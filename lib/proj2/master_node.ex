@@ -26,7 +26,7 @@ defmodule MasterNode do
 
     if nodeLen == 0 and topoCheck == true do
       :timer.sleep(1000)
-      Process.exit(:global.whereis_name(:jahin), :kill)
+      Process.exit(:global.whereis_name(:main_process), :kill)
     end
 
     if nodeLen == 0 do

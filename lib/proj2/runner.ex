@@ -1,50 +1,55 @@
 defmodule Runner do
   def run(args) do
-    b = System.system_time(:millisecond)
-    :global.register_name(:jahin, self())
-    numNodes = String.to_integer(Enum.at(args, 0))
-    topo = Enum.at(args, 1)
-    algorithm = Enum.at(args, 2)
+    start_time = System.system_time(:millisecond)
+    
+    :global.register_name(:main_process, self())
 
-    if topo == "2D" or topo == "imp2D" do
-      sqrt = :math.sqrt(numNodes) |> Float.floor() |> round
-      numNodes = :math.pow(sqrt, 2) |> round
+    [n, topology, algorithm] = args
+    n = String.to_integer(n)
+
+    if topology == "2D" or topology == "imp2D" do
+      sqrt = :math.sqrt(n) |> Float.floor() |> round
+      n = :math.pow(sqrt, 2) |> round
     end
 
-    startingNode = :rand.uniform(numNodes)
+    starting_node = :rand.uniform(n)
 
-    cond do
-      algorithm == "gossip" ->
-        Gossip.createNodes(numNodes)
-        {:ok, pid1} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
-        :global.register_name(:nodeMaster, pid1)
-        :global.sync()
-        nodeName = String.to_atom("node#{startingNode}")
-        Gossip.add_message(:global.whereis_name(nodeName), "Gossip", startingNode, topo, numNodes)
-        Gossip.s(numNodes, b, topo)
-
-      algorithm == "push-sum" ->
-        PushSum.createNodes(numNodes)
-        {:ok, pid1} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
-        :global.register_name(:nodeMaster, pid1)
-
-        :global.sync()
-        nodeName = String.to_atom("node#{startingNode}")
-
-        PushSum.add_message(
-          :global.whereis_name(nodeName),
-          "Push-Sum",
-          startingNode,
-          topo,
-          numNodes,
-          0,
-          0
-        )
-
-        PushSum.s(numNodes, b, topo)
-
-      true ->
+    case args do
+      [_, _, "gossip"] ->
+        run_gossip(n, starting_node, topology, start_time)
+      [_, _, "push-sum"] ->
+        run_pushsum(n, starting_node, topology, start_time)  
+      _ ->
         "Invalid algorithm"
     end
   end
+
+  def run_gossip(n, starting_node, topology, start_time) do
+    Gossip.createNodes(n)
+    {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
+    :global.register_name(:nodeMaster, pid)
+    :global.sync()
+    name = String.to_atom("node#{starting_node}")
+    Gossip.add_message(:global.whereis_name(name), "Gossip", starting_node, topology, n)
+    Gossip.s(n, start_time, topology)
+  end
+
+  def run_pushsum(n, starting_node, topology, start_time) do
+    PushSum.createNodes(n)
+    {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
+    :global.register_name(:nodeMaster, pid)
+    :global.sync()
+    name = String.to_atom("node#{starting_node}")
+    PushSum.add_message(
+      :global.whereis_name(name),
+      "Push-Sum",
+      starting_node,
+      topology,
+      n,
+      0,
+      0
+    )
+    PushSum.s(n, start_time, topology)
+  end
+
 end

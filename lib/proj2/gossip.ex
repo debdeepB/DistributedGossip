@@ -1,8 +1,6 @@
 defmodule Gossip do
   use GenServer
 
-  # API
-
   def start_link do
     GenServer.start_link(__MODULE__, [])
   end
@@ -11,7 +9,7 @@ defmodule Gossip do
     GenServer.cast(pid, {:add_message, message, number, topo, numNodes})
   end
 
-  def s(n, b, topo) do
+  def s(n, start_time, topo) do
     blacklist = MasterNode.get_blacklist(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
     threshold = 0.1
@@ -23,14 +21,12 @@ defmodule Gossip do
     end
 
     if(bllen / n >= threshold) do
-      IO.puts("Time = #{System.system_time(:millisecond) - b}")
+      IO.puts("Time = #{System.system_time(:millisecond) - start_time}")
       Process.exit(self(), :kill)
     end
 
-    s(n, b, topo)
+    s(n, start_time, topo)
   end
-
-  # SERVER
 
   def init(messages) do
     {:ok, messages}
