@@ -1,7 +1,7 @@
 defmodule Gossip do
   use GenServer
 
-  #client apis
+  # client apis
   def start_link do
     GenServer.start_link(__MODULE__, [])
   end
@@ -29,7 +29,7 @@ defmodule Gossip do
     s(n, start_time, topo)
   end
 
-  #server apis
+  # server apis
 
   def init(messages) do
     {:ok, messages}
@@ -47,7 +47,7 @@ defmodule Gossip do
     {:noreply, messages + 1}
   end
 
-  #other methods
+  # other methods
 
   def init_nodes(num) do
     Enum.each(1..num, fn i -> create_node(i) end)

@@ -1,7 +1,7 @@
 defmodule Runner do
   def run(args) do
     start_time = System.system_time(:millisecond)
-    
+
     :global.register_name(:main_process, self())
 
     [n, topology, algorithm] = args
@@ -17,8 +17,10 @@ defmodule Runner do
     case args do
       [_, _, "gossip"] ->
         run_gossip({n, starting_node, topology}, start_time)
+
       [_, _, "push-sum"] ->
         run_pushsum({n, starting_node, topology}, start_time)
+
       _ ->
         "Invalid algorithm"
     end
@@ -40,6 +42,7 @@ defmodule Runner do
     :global.register_name(:nodeMaster, pid)
     :global.sync()
     name = String.to_atom("node#{starting_node}")
+
     PushSum.add_message(
       :global.whereis_name(name),
       "Push-Sum",
@@ -49,7 +52,7 @@ defmodule Runner do
       0,
       0
     )
+
     PushSum.s(n, start_time, topology)
   end
-
 end
