@@ -6,8 +6,8 @@ defmodule Gossip do
     GenServer.start_link(__MODULE__, [])
   end
 
-  def add_message(pid, message, number, topo, numNodes) do
-    GenServer.cast(pid, {:add_message, message, number, topo, numNodes})
+  def send_message(pid, {message, number, topology, n}) do
+    GenServer.cast(pid, {:send_message, message, number, topology, n})
   end
 
   def s(n, start_time, topo) do
@@ -35,7 +35,7 @@ defmodule Gossip do
     {:ok, messages}
   end
 
-  def handle_cast({:add_message, new_message, number, topo, numNodes}, messages) do
+  def handle_cast({:send_message, new_message, number, topo, numNodes}, messages) do
     if messages == 9 do
       MasterNode.add_blacklist(:global.whereis_name(:nodeMaster), number)
     end
@@ -43,7 +43,7 @@ defmodule Gossip do
     r = MasterNode.get_whitelist(:global.whereis_name(:nodeMaster), number, topo, numNodes)
     nodeName = String.to_atom("node#{r}")
     :timer.sleep(1)
-    Gossip.add_message(:global.whereis_name(nodeName), new_message, r, topo, numNodes)
+    Gossip.send_message(:global.whereis_name(nodeName), {new_message, r, topo, numNodes})
     {:noreply, messages + 1}
   end
 

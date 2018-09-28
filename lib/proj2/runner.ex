@@ -32,7 +32,7 @@ defmodule Runner do
     :global.register_name(:nodeMaster, pid)
     :global.sync()
     name = String.to_atom("node#{starting_node}")
-    Gossip.add_message(:global.whereis_name(name), "Gossip", starting_node, topology, n)
+    Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
     Gossip.s(n, start_time, topology)
   end
 
