@@ -1,7 +1,6 @@
 defmodule MasterNode do
   use GenServer
 
-  # API 
   def add_blacklist(pid, message) do
     GenServer.cast(pid, {:add_blacklist, message})
   end
@@ -36,8 +35,6 @@ defmodule MasterNode do
       Enum.at(nodeList, randomNeighbor - 1)
     end
   end
-
-  # SERVER
 
   def init(messages) do
     {:ok, messages}

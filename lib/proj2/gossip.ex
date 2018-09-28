@@ -1,6 +1,7 @@
 defmodule Gossip do
   use GenServer
 
+  #client apis
   def start_link do
     GenServer.start_link(__MODULE__, [])
   end
@@ -28,6 +29,8 @@ defmodule Gossip do
     s(n, start_time, topo)
   end
 
+  #server apis
+
   def init(messages) do
     {:ok, messages}
   end
@@ -44,12 +47,15 @@ defmodule Gossip do
     {:noreply, messages + 1}
   end
 
-  def createNodes(times) do
-    if times > 0 do
-      nodeName = String.to_atom("node#{times}")
-      {:ok, pid} = GenServer.start_link(Gossip, 1, name: nodeName)
-      :global.register_name(nodeName, pid)
-      createNodes(times - 1)
-    end
+  #other methods
+
+  def init_nodes(num) do
+    Enum.each(1..num, fn i -> create_node(i) end)
+  end
+
+  def create_node(n) do
+    name = String.to_atom("node#{n}")
+    {:ok, pid} = GenServer.start_link(Gossip, 1, name: name)
+    :global.register_name(name, pid)
   end
 end

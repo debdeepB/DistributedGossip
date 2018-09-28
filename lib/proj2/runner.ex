@@ -16,16 +16,16 @@ defmodule Runner do
 
     case args do
       [_, _, "gossip"] ->
-        run_gossip(n, starting_node, topology, start_time)
+        run_gossip({n, starting_node, topology}, start_time)
       [_, _, "push-sum"] ->
-        run_pushsum(n, starting_node, topology, start_time)  
+        run_pushsum({n, starting_node, topology}, start_time)
       _ ->
         "Invalid algorithm"
     end
   end
 
-  def run_gossip(n, starting_node, topology, start_time) do
-    Gossip.createNodes(n)
+  def run_gossip({n, starting_node, topology}, start_time) do
+    Gossip.init_nodes(n)
     {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
     :global.register_name(:nodeMaster, pid)
     :global.sync()
@@ -34,7 +34,7 @@ defmodule Runner do
     Gossip.s(n, start_time, topology)
   end
 
-  def run_pushsum(n, starting_node, topology, start_time) do
+  def run_pushsum({n, starting_node, topology}, start_time) do
     PushSum.createNodes(n)
     {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
     :global.register_name(:nodeMaster, pid)
