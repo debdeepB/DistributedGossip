@@ -47,7 +47,7 @@ defmodule Runner do
     :global.sync()
     name = String.to_atom("node#{starting_node}")
 
-    PushSum.add_message(
+    PushSum.send_message(
       :global.whereis_name(name),
       "Push-Sum",
       starting_node,
