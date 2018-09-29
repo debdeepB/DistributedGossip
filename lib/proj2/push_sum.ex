@@ -6,8 +6,8 @@ defmodule PushSum do
     GenServer.start_link(__MODULE__, [])
   end
 
-  def send_message(pid, message, number, topo, numNodes, halfS, halfW) do
-    GenServer.cast(pid, {:send_message, message, number, topo, numNodes, halfS, halfW})
+  def send_message(pid, {message, number, topology, n, s_half, w_half}) do
+    GenServer.cast(pid, {:send_message, message, number, topology, n, s_half, w_half})
   end
 
   def s(n, b, topo) do
@@ -62,13 +62,14 @@ defmodule PushSum do
     nodeName = String.to_atom("node#{r}")
 
     PushSum.send_message(
-      :global.whereis_name(nodeName),
+      :global.whereis_name(nodeName),{
       new_message,
       r,
       topo,
       numNodes,
       halfS,
       halfW
+      }
     )
 
     {:noreply, newState}
