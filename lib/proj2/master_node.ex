@@ -1,16 +1,16 @@
 defmodule MasterNode do
   use GenServer
 
-  def add_blacklist(pid, message) do
-    GenServer.cast(pid, {:add_blacklist, message})
+  def add_saturated(pid, node_num) do
+    GenServer.cast(pid, {:add_saturated, node_num})
   end
 
-  def get_blacklist(pid) do
-    GenServer.call(pid, :get_blacklist, :infinity)
+  def get_saturated(pid) do
+    GenServer.call(pid, :get_saturated, :infinity)
   end
 
-  def get_whitelist(pid, nodeId, topo, numNodes) do
-    GenServer.call(pid, {:get_whitelist, nodeId, topo, numNodes}, :infinity)
+  def get_neighbour(pid, node_id, topology, n) do
+    GenServer.call(pid, {:get_neighbour, node_id, topology, n}, :infinity)
   end
 
   def whiteRandom(topo, numNodes, nodeId, messages) do
@@ -42,21 +42,21 @@ defmodule MasterNode do
     {:ok, messages}
   end
 
-  def handle_call(:get_blacklist, _from, messages) do
-    {:reply, messages, messages}
+  def handle_call(:get_saturated, _from, state) do
+    {:reply, state, state}
   end
 
-  def handle_call({:get_whitelist, nodeId, topo, numNodes}, _from, messages) do
-    nodernd = whiteRandom(topo, numNodes, nodeId, messages)
-    {:reply, nodernd, messages}
+  def handle_call({:get_neighbour, node_id, topology, n}, _from, state) do
+    neighbour_id = whiteRandom(topology, n, node_id, state)
+    {:reply, neighbour_id, state}
   end
 
-  def handle_cast({:add_blacklist, new_message}, messages) do
-    {:noreply, [new_message | messages]}
+  def handle_cast({:add_saturated, node_num}, state) do
+    {:noreply, [node_num | state]}
   end
 
   def s(n, b, topo) do
-    blacklist = MasterNode.get_blacklist(:global.whereis_name(:nodeMaster))
+    blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
 
     threshold =

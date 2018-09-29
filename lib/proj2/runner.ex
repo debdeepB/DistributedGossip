@@ -36,7 +36,8 @@ defmodule Runner do
     :global.sync()
     name = String.to_atom("node#{starting_node}")
     Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
-    check_convergence(n, start_time)
+    # check_convergence(n, start_time)
+    MasterNode.s(n, start_time, topology)
   end
 
   def run_pushsum({n, starting_node, topology}, start_time) do
@@ -63,7 +64,7 @@ defmodule Runner do
     converged =
       Enum.all?(1..n, fn node_num ->
         name = String.to_atom("node#{node_num}")
-        messages = :sys.get_state(:global.whereis_name(name))
+        messages = :sys.get_state(:global.whereis_name(name), :infinity)
         messages > 1
       end)
 

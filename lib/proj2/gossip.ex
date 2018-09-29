@@ -16,15 +16,15 @@ defmodule Gossip do
     {:ok, messages}
   end
 
-  def handle_cast({:send_message, message, number, topology, n}, messages) do
+  def handle_cast({:send_message, message, node_id, topology, n}, messages) do
     if messages == 9 do
-      MasterNode.add_blacklist(:global.whereis_name(:nodeMaster), number)
+      MasterNode.add_saturated(:global.whereis_name(:nodeMaster), node_id)
     end
 
-    neighbour = MasterNode.get_whitelist(:global.whereis_name(:nodeMaster), number, topology, n)
-    name = String.to_atom("node#{neighbour}")
+    neighbour_id = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), node_id, topology, n)
+    name = String.to_atom("node#{neighbour_id}")
     :timer.sleep(1)
-    Gossip.send_message(:global.whereis_name(name), {message, neighbour, topology, n})
+    Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
     messages = messages + 1
     {:noreply, messages}
   end

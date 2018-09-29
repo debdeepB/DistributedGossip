@@ -11,7 +11,7 @@ defmodule PushSum do
   end
 
   def s(n, b, topo) do
-    blacklist = MasterNode.get_blacklist(:global.whereis_name(:nodeMaster))
+    blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
     threshold = 0.1
 
@@ -46,7 +46,7 @@ defmodule PushSum do
 
     if oldRatio - newRatio < 0.0000000001 do
       if Enum.at(messages, 2) == 2 do
-        MasterNode.add_blacklist(:global.whereis_name(:nodeMaster), number)
+        MasterNode.add_saturated(:global.whereis_name(:nodeMaster), number)
       end
 
       oldCount = Enum.at(messages, 2) + 1
@@ -60,7 +60,7 @@ defmodule PushSum do
 
     newState = [newS, newW, oldCount]
 
-    r = MasterNode.get_whitelist(:global.whereis_name(:nodeMaster), number, topo, numNodes)
+    r = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), number, topo, numNodes)
     nodeName = String.to_atom("node#{r}")
 
     PushSum.add_message(
