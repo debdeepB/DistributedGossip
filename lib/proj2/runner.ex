@@ -7,10 +7,13 @@ defmodule Runner do
     [n, topology, algorithm] = args
     n = String.to_integer(n)
 
-    if topology == "2D" or topology == "imp2D" do
-      sqrt = :math.sqrt(n) |> Float.floor() |> round
-      n = :math.pow(sqrt, 2) |> round
-    end
+    n =
+      if topology == "2D" or topology == "imp2D" do
+        sqrt = :math.sqrt(n) |> Float.floor() |> round
+        :math.pow(sqrt, 2) |> round
+      else
+        n
+      end
 
     starting_node = :rand.uniform(n)
 
@@ -33,7 +36,7 @@ defmodule Runner do
     :global.sync()
     name = String.to_atom("node#{starting_node}")
     Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
-    Gossip.s(n, start_time, topology)
+    check_convergence(n, start_time)
   end
 
   def run_pushsum({n, starting_node, topology}, start_time) do
@@ -54,5 +57,21 @@ defmodule Runner do
     )
 
     PushSum.s(n, start_time, topology)
+  end
+
+  def check_convergence(n, start_time) do
+    converged =
+      Enum.all?(1..n, fn node_num ->
+        name = String.to_atom("node#{node_num}")
+        messages = :sys.get_state(:global.whereis_name(name))
+        messages > 1
+      end)
+
+    if converged do
+      IO.puts("Time = #{System.system_time(:millisecond) - start_time}")
+      Process.exit(self(), :kill)
+    end
+
+    check_convergence(n, start_time)
   end
 end

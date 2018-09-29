@@ -1,70 +1,73 @@
 defmodule Topology do
-  def imp2Dloop(n, neighbor, l) do
-    ran = :rand.uniform(n)
+  def imperfect_line_loop(neighbor, n, l) do
+    rand = :rand.uniform(n)
 
-    if ran == l or Enum.member?(neighbor, ran) == true do
-      imp2Dloop(n, neighbor, l)
-    else
-      ran
-    end
+    random_neighbor =
+      if rand == l or Enum.member?(neighbor, rand) do
+        imperfect_line_loop(neighbor, n, l)
+      else
+        rand
+      end
+
+    random_neighbor
   end
 
   def select_topology(topology, n, l) do
-    max = n
-    number2d = l
-
     cond do
       topology == "line" ->
         cond do
-          l == 1 -> neighbor = [l + 1]
-          l == max -> neighbor = [l - 1]
-          true -> neighbor = [l + 1, l - 1]
+          l == 1 -> [l + 1]
+          l == n -> [l - 1]
+          true -> [l + 1, l - 1]
         end
 
-      topology == "full" ->
-        neighbor = Enum.to_list(1..max)
+      topology == "imperfect-line" ->
+        neighbor =
+          cond do
+            l == 1 -> [l + 1]
+            l == n -> [l - 1]
+            true -> [l + 1, l - 1]
+          end
 
-      topology == "2D" or topology == "imp2D" ->
+        neighbor ++ [imperfect_line_loop(neighbor, n, l)]
+
+      topology == "full" ->
+        Enum.to_list(1..n)
+
+      topology == "2D" ->
         j = :math.sqrt(n) |> round
         neighbor = []
 
-        if rem(l, j) == 0 do
-          neighbor = neighbor ++ [l + 1]
-        end
+        neighbor = if rem(l, j) == 0, do: neighbor ++ [l + 1], else: neighbor
 
-        if rem(l + 1, j) do
-          neighbor = neighbor ++ [l - 1]
-        end
+        neighbor = if rem(l + 1, j), do: neighbor ++ [l - 1], else: neighbor
 
-        if l - j < 0 do
-          neighbor = neighbor ++ [l + j]
-        end
+        neighbor = if l - j < 0, do: neighbor ++ [l + j], else: neighbor
 
-        if l - (n - j) >= 0 do
-          neighbor = neighbor ++ [l - j]
-        end
+        neighbor = if l - (n - j) >= 0, do: neighbor ++ [l - j], else: neighbor
 
-        if n > 4 do
-          if rem(l, j) != 0 and rem(l + 1, j) != 0 do
-            neighbor = neighbor ++ [l - 1]
-            neighbor = neighbor ++ [l + 1]
+        neighbor =
+          if n > 4 do
+            neighbor =
+              if rem(l, j) != 0 and rem(l + 1, j) != 0 do
+                neighbor ++ [l - 1, l + 1]
+              else
+                neighbor
+              end
+
+            neighbor =
+              if l - j > 0 and l - (n - j) < 0 do
+                neighbor ++ [l + j, l - j]
+              else
+                neighbor
+              end
+
+            neighbor = if l == j, do: neighbor ++ [l - j, l + j], else: neighbor
+
+            neighbor
+          else
+            neighbor
           end
-
-          if l - j > 0 and l - (n - j) < 0 do
-            neighbor = neighbor ++ [l + j]
-            neighbor = neighbor ++ [l - j]
-          end
-
-          if l == j do
-            neighbor = neighbor ++ [l - j]
-            neighbor = neighbor ++ [l + j]
-          end
-        end
-
-        if topology == "imp2D" do
-          rnd = imp2Dloop(n, neighbor, l)
-          neighbor = neighbor ++ [rnd]
-        end
 
         neighbor
 

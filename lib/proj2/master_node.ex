@@ -17,11 +17,13 @@ defmodule MasterNode do
     nodeList = Topology.checkRnd(topo, numNodes, nodeId)
     nodeList = Enum.filter(nodeList, fn el -> !Enum.member?(messages, el) end)
     nodeLen = Kernel.length(nodeList)
-    topoCheck = false
 
-    if topo == "line" or topo == "2D" do
-      topoCheck = true
-    end
+    topoCheck =
+      if topo == "line" or topo == "2D" do
+        true
+      else
+        false
+      end
 
     if nodeLen == 0 and topoCheck == true do
       :timer.sleep(1000)
@@ -44,12 +46,31 @@ defmodule MasterNode do
     {:reply, messages, messages}
   end
 
+  def handle_call({:get_whitelist, nodeId, topo, numNodes}, _from, messages) do
+    nodernd = whiteRandom(topo, numNodes, nodeId, messages)
+    {:reply, nodernd, messages}
+  end
+
   def handle_cast({:add_blacklist, new_message}, messages) do
     {:noreply, [new_message | messages]}
   end
 
-  def handle_call({:get_whitelist, nodeId, topo, numNodes}, _from, messages) do
-    nodernd = whiteRandom(topo, numNodes, nodeId, messages)
-    {:reply, nodernd, messages}
+  def s(n, b, topo) do
+    blacklist = MasterNode.get_blacklist(:global.whereis_name(:nodeMaster))
+    bllen = Kernel.length(blacklist)
+
+    threshold =
+      if topo == "line" or topo == "2D" do
+        0.1
+      else
+        0.5
+      end
+
+    if(bllen / n >= threshold) do
+      IO.puts("Time = #{System.system_time(:millisecond) - b}")
+      Process.exit(self(), :kill)
+    end
+
+    s(n, b, topo)
   end
 end
