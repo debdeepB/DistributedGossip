@@ -13,12 +13,11 @@ defmodule PushSum do
   def s(n, b, topo) do
     blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
-    threshold = 0.1
 
-    if topo == "line" or topo == "2D" do
-      threshold = 0.1
+    threshold = if topo == "line" or topo == "2D" do
+      0.1
     else
-      threshold = 0.5
+      0.5
     end
 
     if(bllen / n >= threshold) do
@@ -42,14 +41,13 @@ defmodule PushSum do
     oldRatio = Enum.at(messages, 0) / Enum.at(messages, 1)
     newRatio = newS / newW
 
-    oldCount = 0
-
-    if oldRatio - newRatio < 0.0000000001 do
+    oldCount = if oldRatio - newRatio < 0.0000000001 do
       if Enum.at(messages, 2) == 2 do
         MasterNode.add_saturated(:global.whereis_name(:nodeMaster), number)
       end
-
-      oldCount = Enum.at(messages, 2) + 1
+      Enum.at(messages, 2) + 1
+    else
+      0
     end
 
     halfS = newS / 2
