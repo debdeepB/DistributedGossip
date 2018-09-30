@@ -20,16 +20,22 @@ defmodule Gossip do
     if messages == 9 do
       MasterNode.add_saturated(:global.whereis_name(:nodeMaster), node_id)
     end
-
-    neighbour_id = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), node_id, topology, n)
-    name = String.to_atom("node#{neighbour_id}")
-    :timer.sleep(1)
-    Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
+    
+    Task.async(fn -> keep_spreading(message, node_id, topology, n) end)
     messages = messages + 1
     {:noreply, messages}
   end
 
   # other methods
+
+  def keep_spreading(message, node_id, topology, n) do
+    :timer.sleep(1)
+    neighbour_id = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), node_id, topology, n)
+    IO.puts "#{node_id}->#{neighbour_id}"
+    name = String.to_atom("node#{neighbour_id}")
+    Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
+    keep_spreading(message, node_id, topology, n)
+  end
 
   def init_nodes(num) do
     Enum.each(1..num, fn i -> create_node(i) end)
