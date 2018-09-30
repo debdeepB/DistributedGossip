@@ -8,12 +8,16 @@ defmodule Runner do
     n = String.to_integer(n)
 
     n =
-      if topology == "2D" or topology == "imp2D" do
+      if topology == "random-2D" do
         sqrt = :math.sqrt(n) |> Float.floor() |> round
         :math.pow(sqrt, 2) |> round
       else
         n
       end
+
+    if topology == "random-2D" do
+      Topology.initialize_ets_table(n)
+    end
 
     starting_node = :rand.uniform(n)
 
