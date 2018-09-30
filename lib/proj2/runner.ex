@@ -41,7 +41,6 @@ defmodule Runner do
     name = String.to_atom("node#{starting_node}")
     Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
     check_convergence(n, start_time)
-    # MasterNode.s(n, start_time, topology)
   end
 
   def run_pushsum({n, starting_node, topology}, start_time) do
@@ -61,8 +60,7 @@ defmodule Runner do
       0
       }
     )
-
-    PushSum.s(n, start_time, topology)
+    check_convergence(n, start_time)
   end
 
   def check_convergence(n, start_time) do

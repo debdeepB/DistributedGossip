@@ -58,9 +58,15 @@ defmodule PushSum do
 
     newState = [newS, newW, oldCount]
 
+    Task.async(fn -> keep_spreading(new_message, number, topo, numNodes, halfS, halfW) end)
+
+    {:noreply, newState}
+  end
+
+  def keep_spreading(new_message, number, topo, numNodes, halfS, halfW) do
+    :timer.sleep(1)
     r = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), number, topo, numNodes)
     nodeName = String.to_atom("node#{r}")
-
     PushSum.send_message(
       :global.whereis_name(nodeName),{
       new_message,
@@ -71,8 +77,7 @@ defmodule PushSum do
       halfW
       }
     )
-
-    {:noreply, newState}
+    keep_spreading(new_message, number, topo, numNodes, halfS, halfW)
   end
 
   def createNodes(times) do
