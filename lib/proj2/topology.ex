@@ -35,7 +35,7 @@ defmodule Topology do
         Enum.to_list(1..n)
       
       topology == "random-2D" ->
-        find_2d_neighbour(l)
+        lookup_2d_neighbour(l)
 
       true ->
         "Select a valid topology"
@@ -51,21 +51,35 @@ defmodule Topology do
     nodeList
   end
 
-  def initialize_ets_table(n) do
+  def initialize_ets_tables(n) do
     table = :ets.new(:random_2d, [:named_table])
     map = Enum.reduce 1..n, %{}, fn node_id, acc ->
       Map.put(acc, node_id, [x: :rand.uniform(), y: :rand.uniform()])
     end
     :ets.insert(table, {"data", map})
+    initialize_2d_neighbour_table(n)
+  end
+
+  def initialize_2d_neighbour_table(n) do
+    table = :ets.new(:random_2d_neighbour, [:named_table])
+    map = Enum.reduce 1..n, %{}, fn node_id, acc ->
+      Map.put(acc, node_id, find_2d_neighbour(node_id))
+    end
+    :ets.insert(table, {"data", map})
   end
 
   def find_2d_neighbour(node_id) do
-    [{"data", map}] = :ets.lookup(:random_2d, "data")
+    [{_, map}] = :ets.lookup(:random_2d, "data")
     current_node = map[node_id]
     Enum.filter 1..map_size(map), fn id ->
       dist = :math.pow(map[id][:x] - current_node[:x],2) + :math.pow(map[id][:y] - current_node[:y], 2) |> :math.sqrt()
       dist < 0.5 and id != node_id
     end
+  end
+
+  def lookup_2d_neighbour(node_id) do
+    [{_, map}] = :ets.lookup(:random_2d_neighbour, "data")
+    map[node_id]
   end
   
 end

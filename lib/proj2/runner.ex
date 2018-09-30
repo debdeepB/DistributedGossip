@@ -16,7 +16,7 @@ defmodule Runner do
       end
 
     if topology == "random-2D" do
-      Topology.initialize_ets_table(n)
+      Topology.initialize_ets_tables(n)
     end
 
     starting_node = :rand.uniform(n)
