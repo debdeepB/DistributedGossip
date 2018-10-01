@@ -43,22 +43,4 @@ defmodule MasterNode do
     {:noreply, [node_num | state]}
   end
 
-  def s(n, b, topo) do
-    blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
-    bllen = Kernel.length(blacklist)
-
-    threshold =
-      if topo == "line" or topo == "2D" do
-        0.1
-      else
-        0.5
-      end
-
-    if(bllen / n >= threshold) do
-      IO.puts("Time = #{System.system_time(:millisecond) - b}")
-      Process.exit(self(), :kill)
-    end
-
-    s(n, b, topo)
-  end
 end
