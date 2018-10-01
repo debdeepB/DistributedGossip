@@ -40,6 +40,9 @@ defmodule Topology do
       topology == "3D" ->
         lookup_3d_neighbour(node_id)
 
+      topology == "torus" ->
+        lookup_torus_neighbour(node_id)
+
       true ->
         "Select a valid topology"
     end
@@ -131,5 +134,58 @@ defmodule Topology do
     ]
 
     Enum.filter(neighbours, fn x -> x != nil end)
+  end
+
+  def initialize_torus_table(n) do
+    table = :ets.new(:torus, [:named_table])
+    sqrt_n = :math.sqrt(n) |> Kernel.trunc()
+
+    map =
+      Enum.reduce(1..n, %{}, fn node_id, acc ->
+        Map.put(acc, node_id, find_torus_neighbour(node_id, n, sqrt_n))
+      end)
+
+    :ets.insert(table, {"data", map})
+  end
+
+  def find_torus_neighbour(k, n, sqrt_n) do
+    # top
+    top =
+      if Enum.member?(1..sqrt_n, k) do
+        k + n - sqrt_n
+      else
+        k - sqrt_n
+      end
+
+    # bottom
+    bottom =
+      if Enum.member?((n - sqrt_n + 1)..n, k) do
+        k - n + sqrt_n
+      else
+        k + sqrt_n
+      end
+
+    # left
+    left =
+      if rem(k, sqrt_n) == 1 do
+        k + sqrt_n - 1
+      else
+        k - 1
+      end
+
+    # right
+    right =
+      if rem(k, sqrt_n) == 0 do
+        rem(k + 1, sqrt_n)
+      else
+        k + 1
+      end
+
+    [top, bottom, left, right]
+  end
+
+  def lookup_torus_neighbour(node_id) do
+    [{_, map}] = :ets.lookup(:torus, "data")
+    map[node_id]
   end
 end
