@@ -42,5 +42,4 @@ defmodule MasterNode do
   def handle_cast({:add_saturated, node_num}, state) do
     {:noreply, [node_num | state]}
   end
-
 end

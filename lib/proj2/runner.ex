@@ -5,7 +5,7 @@ defmodule Runner do
     :global.register_name(:main_process, self())
 
     n = preprocess_network(args)
-      
+
     starting_node = :rand.uniform(n)
 
     case args do
@@ -61,7 +61,7 @@ defmodule Runner do
       end)
 
     if converged do
-      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time)/1000} seconds")
+      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time) / 1000} seconds")
       Process.exit(self(), :kill)
     end
 
@@ -73,12 +73,12 @@ defmodule Runner do
       Enum.all?(1..n, fn node_num ->
         name = String.to_atom("node#{node_num}")
         messages = :sys.get_state(:global.whereis_name(name))
-        messages = Enum.at(messages,2)
+        messages = Enum.at(messages, 2)
         messages > 0
       end)
 
     if converged do
-      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time)/1000} seconds")
+      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time) / 1000} seconds")
       Process.exit(self(), :kill)
     end
 
@@ -87,6 +87,7 @@ defmodule Runner do
 
   def preprocess_network([n, topology, _algorithm]) do
     n = String.to_integer(n)
+
     cond do
       topology == "random-2D" ->
         sqrt = :math.sqrt(n) |> Float.floor() |> round
@@ -98,6 +99,12 @@ defmodule Runner do
         cuberoot = :math.pow(n, 0.33) |> round
         n = :math.pow(cuberoot, 3) |> round
         Topology.initialize_3d_tables({cuberoot, cuberoot, cuberoot})
+        n
+
+      topology == "torus" ->
+        sqrt = :math.sqrt(n) |> Float.floor() |> round
+        n = :math.pow(sqrt, 2) |> round
+        Topology.initialize_torus_table(n)
         n
 
       true ->
