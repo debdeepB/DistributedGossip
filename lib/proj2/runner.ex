@@ -8,16 +8,22 @@ defmodule Runner do
     n = String.to_integer(n)
 
     n =
-      if topology == "random-2D" do
-        sqrt = :math.sqrt(n) |> Float.floor() |> round
-        :math.pow(sqrt, 2) |> round
-      else
-        n
-      end
+      cond do
+        topology == "random-2D" ->
+          sqrt = :math.sqrt(n) |> Float.floor() |> round
+          n = :math.pow(sqrt, 2) |> round
+          Topology.initialize_ets_tables(n)
+          n
 
-    if topology == "random-2D" do
-      Topology.initialize_ets_tables(n)
-    end
+        topology == "3D" ->
+          cuberoot = :math.pow(n, 0.33) |> round
+          n = :math.pow(cuberoot, 3) |> round
+          Topology.initialize_3d_tables({cuberoot, cuberoot, cuberoot})
+          n
+
+        true ->
+          n
+      end
 
     starting_node = :rand.uniform(n)
 
@@ -51,15 +57,17 @@ defmodule Runner do
     name = String.to_atom("node#{starting_node}")
 
     PushSum.send_message(
-      :global.whereis_name(name), {
-      "Push-Sum",
-      starting_node,
-      topology,
-      n,
-      0,
-      0
+      :global.whereis_name(name),
+      {
+        "Push-Sum",
+        starting_node,
+        topology,
+        n,
+        0,
+        0
       }
     )
+
     check_convergence(n, start_time)
   end
 
