@@ -33,11 +33,9 @@ defmodule Gossip do
 
     neighbour_id =
       MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), node_id, topology, n)
-
-    IO.puts("#{node_id}->#{neighbour_id}")
-    name = String.to_atom("node#{neighbour_id}")
-    Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
-    keep_spreading(message, node_id, topology, n)
+      name = String.to_atom("node#{neighbour_id}")
+      Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
+      keep_spreading(message, node_id, topology, n)
   end
 
   def init_nodes(num) do

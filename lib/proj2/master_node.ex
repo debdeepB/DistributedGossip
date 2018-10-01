@@ -18,20 +18,8 @@ defmodule MasterNode do
     nodeList = Enum.filter(nodeList, fn el -> !Enum.member?(messages, el) end)
     nodeLen = Kernel.length(nodeList)
 
-    topoCheck =
-      if topo == "line" or topo == "2D" do
-        true
-      else
-        false
-      end
-
-    if nodeLen == 0 and topoCheck == true do
-      :timer.sleep(1000)
-      Process.exit(:global.whereis_name(:main_process), :kill)
-    end
-
     if nodeLen == 0 do
-      whiteRandom(topo, numNodes, nodeId, messages)
+      :noneighbour
     else
       randomNeighbor = :rand.uniform(nodeLen)
       Enum.at(nodeList, randomNeighbor - 1)

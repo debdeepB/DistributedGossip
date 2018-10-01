@@ -14,12 +14,7 @@ defmodule PushSum do
     blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
 
-    threshold =
-      if topo == "line" or topo == "2D" do
-        0.1
-      else
-        0.5
-      end
+    threshold = 1.0
 
     if(bllen / n >= threshold) do
       IO.puts("Time = #{System.system_time(:millisecond) - b}")

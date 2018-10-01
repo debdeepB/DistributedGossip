@@ -27,7 +27,7 @@ defmodule Runner do
     :global.sync()
     name = String.to_atom("node#{starting_node}")
     Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
-    check_convergence(n, start_time)
+    check_convergence(:gossip, n, start_time)
   end
 
   def run_pushsum({n, starting_node, topology}, start_time) do
@@ -49,23 +49,40 @@ defmodule Runner do
       }
     )
 
-    check_convergence(n, start_time)
+    PushSum.s(n, start_time, topology)
   end
 
-  def check_convergence(n, start_time) do
+  def check_convergence(:gossip, n, start_time) do
     converged =
       Enum.all?(1..n, fn node_num ->
         name = String.to_atom("node#{node_num}")
-        messages = :sys.get_state(:global.whereis_name(name), :infinity)
+        messages = :sys.get_state(:global.whereis_name(name))
         messages > 1
       end)
 
     if converged do
-      IO.puts("Time = #{System.system_time(:millisecond) - start_time}")
+      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time)/1000} seconds")
       Process.exit(self(), :kill)
     end
 
-    check_convergence(n, start_time)
+    check_convergence(:gossip, n, start_time)
+  end
+
+  def check_convergence(:push_sum, n, start_time) do
+    converged =
+      Enum.all?(1..n, fn node_num ->
+        name = String.to_atom("node#{node_num}")
+        messages = :sys.get_state(:global.whereis_name(name))
+        messages = Enum.at(messages,2)
+        messages > 0
+      end)
+
+    if converged do
+      IO.puts("Converged in #{(System.system_time(:millisecond) - start_time)/1000} seconds")
+      Process.exit(self(), :kill)
+    end
+
+    check_convergence(:push_sum, n, start_time)
   end
 
   def preprocess_network([n, topology, _algorithm]) do
