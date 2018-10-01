@@ -4,34 +4,15 @@ defmodule Runner do
 
     :global.register_name(:main_process, self())
 
-    [n, topology, algorithm] = args
-    n = String.to_integer(n)
-
-    n =
-      cond do
-        topology == "random-2D" ->
-          sqrt = :math.sqrt(n) |> Float.floor() |> round
-          n = :math.pow(sqrt, 2) |> round
-          Topology.initialize_ets_tables(n)
-          n
-
-        topology == "3D" ->
-          cuberoot = :math.pow(n, 0.33) |> round
-          n = :math.pow(cuberoot, 3) |> round
-          Topology.initialize_3d_tables({cuberoot, cuberoot, cuberoot})
-          n
-
-        true ->
-          n
-      end
-
+    n = preprocess_network(args)
+      
     starting_node = :rand.uniform(n)
 
     case args do
-      [_, _, "gossip"] ->
+      [_, topology, "gossip"] ->
         run_gossip({n, starting_node, topology}, start_time)
 
-      [_, _, "push-sum"] ->
+      [_, topology, "push-sum"] ->
         run_pushsum({n, starting_node, topology}, start_time)
 
       _ ->
@@ -85,5 +66,25 @@ defmodule Runner do
     end
 
     check_convergence(n, start_time)
+  end
+
+  def preprocess_network([n, topology, _algorithm]) do
+    n = String.to_integer(n)
+    cond do
+      topology == "random-2D" ->
+        sqrt = :math.sqrt(n) |> Float.floor() |> round
+        n = :math.pow(sqrt, 2) |> round
+        Topology.initialize_ets_tables(n)
+        n
+
+      topology == "3D" ->
+        cuberoot = :math.pow(n, 0.33) |> round
+        n = :math.pow(cuberoot, 3) |> round
+        Topology.initialize_3d_tables({cuberoot, cuberoot, cuberoot})
+        n
+
+      true ->
+        n
+    end
   end
 end
