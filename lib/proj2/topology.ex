@@ -1,10 +1,10 @@
 defmodule Topology do
-  def imperfect_line_loop(neighbor, n, l) do
+  def imperfect_line_loop(neighbor, n, node_id) do
     rand = :rand.uniform(n)
 
     random_neighbor =
-      if rand == l or Enum.member?(neighbor, rand) do
-        imperfect_line_loop(neighbor, n, l)
+      if rand == node_id or Enum.member?(neighbor, rand) do
+        imperfect_line_loop(neighbor, n, node_id)
       else
         rand
       end
@@ -12,42 +12,42 @@ defmodule Topology do
     random_neighbor
   end
 
-  def select_topology(topology, n, l) do
+  def select_topology(topology, n, node_id) do
     cond do
       topology == "line" ->
         cond do
-          l == 1 -> [l + 1]
-          l == n -> [l - 1]
-          true -> [l + 1, l - 1]
+          node_id == 1 -> [node_id + 1]
+          node_id == n -> [node_id - 1]
+          true -> [node_id + 1, node_id - 1]
         end
 
       topology == "imperfect-line" ->
         neighbor =
           cond do
-            l == 1 -> [l + 1]
-            l == n -> [l - 1]
-            true -> [l + 1, l - 1]
+            node_id == 1 -> [node_id + 1]
+            node_id == n -> [node_id - 1]
+            true -> [node_id + 1, node_id - 1]
           end
 
-        neighbor ++ [imperfect_line_loop(neighbor, n, l)]
+        neighbor ++ [imperfect_line_loop(neighbor, n, node_id)]
 
       topology == "full" ->
         Enum.to_list(1..n)
 
       topology == "random-2D" ->
-        lookup_2d_neighbour(l)
+        lookup_2d_neighbour(node_id)
 
       topology == "3D" ->
-        lookup_3d_neighbour(l)
+        lookup_3d_neighbour(node_id)
 
       true ->
         "Select a valid topology"
     end
   end
 
-  def checkRnd(topology, n, l) do
-    nodeList = select_topology(topology, n, l)
-    nodeList = Enum.filter(nodeList, fn x -> x != l == true end)
+  def checkRnd(topology, n, node_id) do
+    nodeList = select_topology(topology, n, node_id)
+    nodeList = Enum.filter(nodeList, fn x -> x != node_id == true end)
     nodeList = Enum.filter(nodeList, fn x -> x != 0 == true end)
     nodeList = Enum.filter(nodeList, fn x -> x <= n == true end)
     nodeList = Enum.uniq(nodeList)
