@@ -49,7 +49,7 @@ defmodule Runner do
       }
     )
 
-    PushSum.s(n, start_time, topology)
+    PushSum.check_convergence(n, start_time, topology)
   end
 
   def check_convergence(:gossip, n, start_time) do

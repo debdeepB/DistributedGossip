@@ -10,18 +10,18 @@ defmodule PushSum do
     GenServer.cast(pid, {:send_message, message, number, topology, n, s_half, w_half})
   end
 
-  def s(n, b, topo) do
+  def check_convergence(n, b, topo) do
     blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
     bllen = Kernel.length(blacklist)
 
     threshold = 1.0
 
     if(bllen / n >= threshold) do
-      IO.puts("Time = #{System.system_time(:millisecond) - b}")
+      IO.puts("Time = #{(System.system_time(:millisecond) - b)/1000}")
       Process.exit(self(), :kill)
     end
 
-    s(n, b, topo)
+    check_convergence(n, b, topo)
   end
 
   # SERVER
