@@ -18,7 +18,7 @@ defmodule Gossip do
 
   def handle_cast({:send_message, message, node_id, topology, n}, messages) do
     if messages == 9 do
-      MasterNode.add_saturated(:global.whereis_name(:nodeMaster), node_id)
+      Master.add_saturated(:global.whereis_name(:master), node_id)
     end
 
     Task.async(fn -> keep_spreading(message, node_id, topology, n) end)
@@ -32,7 +32,7 @@ defmodule Gossip do
     :timer.sleep(1)
 
     neighbour_id =
-      MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), node_id, topology, n)
+      Master.get_neighbour(:global.whereis_name(:master), node_id, topology, n)
 
     name = String.to_atom("node#{neighbour_id}")
     Gossip.send_message(:global.whereis_name(name), {message, neighbour_id, topology, n})
