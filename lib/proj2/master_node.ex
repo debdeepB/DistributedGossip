@@ -1,4 +1,4 @@
-defmodule MasterNode do
+defmodule Master do
   use GenServer
 
   def add_saturated(pid, node_num) do

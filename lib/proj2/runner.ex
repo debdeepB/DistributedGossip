@@ -22,8 +22,8 @@ defmodule Runner do
 
   def run_gossip({n, starting_node, topology}, start_time) do
     Gossip.init_nodes(n)
-    {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
-    :global.register_name(:nodeMaster, pid)
+    {:ok, pid} = GenServer.start_link(Master, [], name: :master)
+    :global.register_name(:master, pid)
     :global.sync()
     name = String.to_atom("node#{starting_node}")
     Gossip.send_message(:global.whereis_name(name), {"Gossip", starting_node, topology, n})
@@ -32,8 +32,8 @@ defmodule Runner do
 
   def run_pushsum({n, starting_node, topology}, start_time) do
     PushSum.createNodes(n)
-    {:ok, pid} = GenServer.start_link(MasterNode, [], name: :nodeMaster)
-    :global.register_name(:nodeMaster, pid)
+    {:ok, pid} = GenServer.start_link(Master, [], name: :master)
+    :global.register_name(:master, pid)
     :global.sync()
     name = String.to_atom("node#{starting_node}")
 

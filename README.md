@@ -27,7 +27,7 @@ All the topologies (Line, Imperfect Line, Full, Random 2D, 3D, Torus) are workin
 Line - Gossip: 500 nodes, PushSum: 400  
 Imperfect Line - Gossip: 7000, PushSum: 4000  
 Full - Gossip:  6000, PushSum: 1000
-Random2d - Gossip: 6000, PushSum: 800    
+Random2d - Gossip: 1300, PushSum: 800  
 Torus - Gossip: 1200, PushSum: 1000
 
 ## Installation

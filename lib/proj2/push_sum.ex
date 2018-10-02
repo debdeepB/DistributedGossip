@@ -11,7 +11,7 @@ defmodule PushSum do
   end
 
   def check_convergence(n, b, topo) do
-    blacklist = MasterNode.get_saturated(:global.whereis_name(:nodeMaster))
+    blacklist = Master.get_saturated(:global.whereis_name(:master))
     bllen = Kernel.length(blacklist)
 
     threshold = 1.0
@@ -40,7 +40,7 @@ defmodule PushSum do
     oldCount =
       if oldRatio - newRatio < 0.0000000001 do
         if Enum.at(messages, 2) == 2 do
-          MasterNode.add_saturated(:global.whereis_name(:nodeMaster), number)
+          Master.add_saturated(:global.whereis_name(:master), number)
         end
 
         Enum.at(messages, 2) + 1
@@ -63,7 +63,7 @@ defmodule PushSum do
 
   def keep_spreading(new_message, number, topo, numNodes, halfS, halfW) do
     :timer.sleep(1)
-    r = MasterNode.get_neighbour(:global.whereis_name(:nodeMaster), number, topo, numNodes)
+    r = Master.get_neighbour(:global.whereis_name(:master), number, topo, numNodes)
     nodeName = String.to_atom("node#{r}")
 
     PushSum.send_message(
